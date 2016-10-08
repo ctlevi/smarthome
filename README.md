@@ -1,3 +1,17 @@
+# Setup
+`git clone --recursive https://github.com/ctlevi/smarthome.git`
+Make sure to add `--recursive` so that you get all of the necessary submodules for the raspberry pi.
+
+## RaspberryPi
+Setup for the wireless outlets was done through [this amazing tutorial](https://www.samkear.com/hardware/control-power-outlets-wirelessly-raspberry-pi).
+
+The code can then be copied to your RPi, and the following commands run:
+```bash
+npm install
+npm run build // Compiles the C++ code to send the RF signals
+npm run start // Starts the script in a forever process
+```
+
 # Project structure
 The project is a single page webapp with a single AWS Lambda GraphQL endpoint. This endpoint talks to a RaspberryPi over
 AWS IoT's device gateway. This provides secure access to the RaspberryPi, and you can leave it inside your home network

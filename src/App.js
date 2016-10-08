@@ -7,14 +7,14 @@ var myHeaders = new Headers({
   "Accept": "application/json"
 });
 
-function switchStatus(id, number, status) {
+function switchStatus(id, status) {
   fetch('https://gvw188k7c6.execute-api.us-west-2.amazonaws.com/prod/graphql', {
     method: 'POST',
     mode: 'cors',
     body: JSON.stringify({
       query: `
         mutation {
-          updateSwitchStatus(id: "${id}", number: ${number}, status: "${status}")
+          updateSwitchStatus(id: "${id}", status: "${status}")
         }
       `
     }),
@@ -69,8 +69,8 @@ class App extends Component {
             <div>
               <span style={{marginRight: '20px'}}>{object.purpose}</span>
               {object.status === 'off' ?
-                <button disabled={!!object.onRange} style={{background: 'white'}} onClick={() => switchStatus(object.id, object.number, 'on')}>Turn On</button>
-                : <button disabled={!!object.onRange} style={{background: 'yellow'}} onClick={() => switchStatus(object.id, object.number, 'off')}>Turn Off</button>
+                <button disabled={!!object.onRange} style={{background: 'white'}} onClick={() => switchStatus(object.id, 'on')}>Turn On</button>
+                : <button disabled={!!object.onRange} style={{background: 'yellow'}} onClick={() => switchStatus(object.id, 'off')}>Turn Off</button>
               }
             </div>
           );

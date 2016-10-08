@@ -20,10 +20,28 @@ exports.getSwitches = function() {
   });
 };
 
-function getSwitchStatusParams(number, status) {
+exports.getSwitch = function(id) {
+  const params = {
+    TableName : 'switches',
+    Key: {
+      id: id
+    }
+  };
+
+  return new Promise((resolve, reject) => {
+    docClient.get(params, function (err, data) {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(data.Item);
+    });
+  });
+};
+
+function getSwitchStatusParams(switchItem, status) {
   return {
-    topic: 'topic_1',
-    payload: JSON.stringify({ switchNumber: number, status: status })
+    topic: 'lights',
+    payload: JSON.stringify({ code: switchItem.codes[status] })
   };
 }
 
@@ -68,34 +86,30 @@ exports.refreshSwitches = function() {
     const now = new Date();
     switches.map((item) => {
       if (item.onRange) {
-        return { number: item.number, status: getStatusFromRange(now, item.onRange.start, item.onRange.end) };
+        return { switchItem: item, status: getStatusFromRange(now, item.onRange.start, item.onRange.end) };
       } else {
-        return { number: item.number, status: item.status };
+        return { switchItem: item, status: item.status };
       }
     }).forEach((item) => {
-      iotdata.publish(getSwitchStatusParams(item.number, item.status), function(err, data){
+      const params = getSwitchStatusParams(item.switchItem, item.status);
+      iotdata.publish(params, function(err, data){
         if(err) {
           console.log(err);
         }
-        console.log(`toggling ${item.number} to ${item.status}`);
+        console.log(`Turned switch with id ${item.switchItem.id} to ${item.status} using code ${params.payload}`);
       });
     });
   });
 };
 
-
-function updateSwitchReal(number, status) {
-  return new Promise((resolve, reject) => {
-    const params = {
-      topic: 'topic_1',
-      payload: JSON.stringify({switchNumber: number, status: status})
-    };
-
+function updateSwitchReal(id, status) {
+  return exports.getSwitch(id).then((switchItem) => {
+    const params = getSwitchStatusParams(switchItem, status);
     iotdata.publish(params, function (err, data) {
       if (err) {
-        return reject(err);
+        console.log(err);
       }
-      return resolve('worked!');
+      console.log(`Turned switch with id ${id} to ${status} using code ${params.payload}`);
     });
   });
 }
@@ -122,7 +136,7 @@ function updateSwitchDDB(id, status) {
   });
 }
 
-exports.updateSwitchStatus = function(id, number, status) {
+exports.updateSwitchStatus = function(id, status) {
   // TODO deal with results, bluebird says it returns an array with the values resolved
-  return Promise.all([updateSwitchDDB(id, status), updateSwitchReal(number, status)]);
+  return Promise.all([updateSwitchDDB(id, status), updateSwitchReal(id, status)]);
 };

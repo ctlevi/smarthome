@@ -33,6 +33,16 @@ const Query = new G.GraphQLObjectType({
       resolve: function() {
         return switchDao.getSwitches();
       }
+    },
+    switch: {
+      type: Switch,
+      description: "Get a specific switch by id",
+      args: {
+        id: {type: new G.GraphQLNonNull(G.GraphQLString)}
+      },
+      resolve: function(source, args) {
+        return switchDao.getSwitch(args.id);
+      }
     }
   })
 });
@@ -52,11 +62,10 @@ const Mutuation = new G.GraphQLObjectType({
       description: "Update a switch's status in DDB and real life",
       args: {
         id: {type: new G.GraphQLNonNull(G.GraphQLString)},
-        number: {type: new G.GraphQLNonNull(G.GraphQLInt)},
         status: {type: new G.GraphQLNonNull(G.GraphQLString)}
       },
       resolve: function(source, args) {
-        return switchDao.updateSwitchStatus(args.id, args.number, args.status);
+        return switchDao.updateSwitchStatus(args.id, args.status);
       }
     }
   }

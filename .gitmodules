@@ -1,0 +1,6 @@
+[submodule "iot/433Utils"]
+	path = iot/433Utils
+	url = git://github.com/ninjablocks/433Utils.git
+[submodule "iot/wiringPi"]
+	path = iot/wiringPi
+	url = git://git.drogon.net/wiringPi

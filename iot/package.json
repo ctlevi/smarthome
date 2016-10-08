@@ -1,0 +1,16 @@
+{
+  "name": "iot-raspberry",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "cd 433Utils/RPi_utils; make;",
+    "start": "sudo node forever-index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-iot-device-sdk": "^1.0.12",
+    "forever-monitor": "^1.7.0"
+  }
+}

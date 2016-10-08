@@ -14,6 +14,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "upload": "npm run build && aws s3 cp build s3://www.tatesmarthome.com --recursive",
+    "upload": "npm run build && aws s3 cp build s3://www.tatesmarthome.com --recursive"
   }
 }

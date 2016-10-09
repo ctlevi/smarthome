@@ -38,60 +38,10 @@ exports.getSwitch = function(id) {
   });
 };
 
-function getSwitchStatusParams(switchItem, status) {
-  return {
-    topic: 'lights',
-    payload: JSON.stringify({ code: switchItem.codes[status] })
-  };
-}
-
-function getStatusFromRange(now, startTimeString, endTimeString) {
-  const dateString = now.toISOString().split('T')[0];
-  const start = new Date(`${dateString} ${startTimeString}`);
-  const end = new Date(`${dateString} ${endTimeString}`);
-
-  if (start > end) {
-    if (now < end) {
-      return 'on';
-    } else {
-      end.setTime( end.getTime() + 86400000 );
-    }
-  }
-
-  if (start < now && end > now) {
-    return 'on';
-  } else {
-    return 'off';
-  }
-}
-
-function test() {
-  console.log('for time between 15:00 and 04:00');
-  console.log('13:00 should be off', 'off' === getStatusFromRange(new Date('2016-01-01 13:00Z'), '15:00Z', '04:00Z'));
-  console.log('15:00 should be off', 'off' === getStatusFromRange(new Date('2016-01-01 15:00Z'), '15:00Z', '04:00Z'));
-  console.log('16:00 should be on', 'on' === getStatusFromRange(new Date('2016-01-01 16:00Z'), '15:00Z', '04:00Z'));
-  console.log('23:59:59.999 should be on', 'on' === getStatusFromRange(new Date('2016-01-01 23:59:59.999Z'), '15:00Z', '04:00Z'));
-  console.log('00:00 should be on', 'on' === getStatusFromRange(new Date('2016-01-01 00:00Z'), '15:00Z', '04:00Z'));
-  console.log('01:00 should be on', 'on' === getStatusFromRange(new Date('2016-01-01 01:00Z'), '15:00Z', '04:00Z'));
-  console.log('05:00 should be off', 'off' === getStatusFromRange(new Date('2016-01-01 05:00Z'), '15:00Z', '04:00Z'));
-
-  console.log('for time bewteen 04:00 and 06:00');
-  console.log('03:00 should be off', 'off' === getStatusFromRange(new Date('2016-01-01 03:00Z'), '04:00Z', '06:00Z'));
-  console.log('05:00 should be on', 'on' === getStatusFromRange(new Date('2016-01-01 05:00Z'), '04:00Z', '06:00Z'));
-  console.log('07:00 should be off', 'off' === getStatusFromRange(new Date('2016-01-01 07:00Z'), '04:00Z', '06:00Z'));
-}
-
 exports.refreshSwitches = function() {
   return exports.getSwitches().then((switches) => {
-    const now = new Date();
-    switches.map((item) => {
-      if (item.onRange) {
-        return { switchItem: item, status: getStatusFromRange(now, item.onRange.start, item.onRange.end) };
-      } else {
-        return { switchItem: item, status: item.status };
-      }
-    }).forEach((item) => {
-      const params = getSwitchStatusParams(item.switchItem, item.status);
+    switches.forEach((item) => {
+      const params = getSwitchStatusParams(item, item.status);
       iotdata.publish(params, function(err, data){
         if(err) {
           console.log(err);
@@ -100,6 +50,11 @@ exports.refreshSwitches = function() {
       });
     });
   });
+};
+
+exports.updateSwitchStatus = function(id, status) {
+  // TODO deal with results, bluebird says it returns an array with the values resolved
+  return Promise.all([updateSwitchDDB(id, status), updateSwitchReal(id, status)]);
 };
 
 function updateSwitchReal(id, status) {
@@ -136,7 +91,10 @@ function updateSwitchDDB(id, status) {
   });
 }
 
-exports.updateSwitchStatus = function(id, status) {
-  // TODO deal with results, bluebird says it returns an array with the values resolved
-  return Promise.all([updateSwitchDDB(id, status), updateSwitchReal(id, status)]);
-};
+function getSwitchStatusParams(switchItem, status) {
+  return {
+    topic: 'lights',
+    payload: JSON.stringify({ code: switchItem.codes[status] })
+  };
+}
+

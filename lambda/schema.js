@@ -2,12 +2,15 @@
 
 const G = require('graphql');
 const switchDao = require('./switch-dao');
+const schedules = require('./schedules');
 
-const OnRange = new G.GraphQLObjectType({
-  name: "onRange",
+const Schedule = new G.GraphQLObjectType({
+  name: 'schedule',
+  description: 'Schedule of when a switch turns on and off',
   fields: () => ({
-    end: {type: G.GraphQLString},
-    start: {type: G.GraphQLString}
+    switchId: {type: G.GraphQLString},
+    onTime: {type: G.GraphQLString},
+    offTime: {type: G.GraphQLString}
   })
 });
 
@@ -19,7 +22,12 @@ const Switch = new G.GraphQLObjectType({
     number: {type: G.GraphQLInt},
     purpose: {type: G.GraphQLString},
     status: {type: G.GraphQLString}, // TODO check out enum type
-    onRange: {type: OnRange}
+    schedule: {
+      type: Schedule,
+      resolve: function(switchItem) {
+        return schedules.getSchedule(switchItem.id);
+      }
+    }
   })
 });
 
@@ -42,6 +50,13 @@ const Query = new G.GraphQLObjectType({
       },
       resolve: function(source, args) {
         return switchDao.getSwitch(args.id);
+      }
+    },
+    schedules: {
+      type: new G.GraphQLList(Schedule),
+      description: "List of schedules we have for switches",
+      resolve: function() {
+        return schedules.getSchedules();
       }
     }
   })

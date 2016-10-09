@@ -35,9 +35,9 @@ function getSwitches() {
             number,
             purpose,
             status,
-            onRange {
-              start,
-              end
+            schedule {
+              onTime,
+              offTime
             }
           }
         }
@@ -69,8 +69,12 @@ class App extends Component {
             <div>
               <span style={{marginRight: '20px'}}>{object.purpose}</span>
               {object.status === 'off' ?
-                <button disabled={!!object.onRange} style={{background: 'white'}} onClick={() => switchStatus(object.id, 'on')}>Turn On</button>
-                : <button disabled={!!object.onRange} style={{background: 'yellow'}} onClick={() => switchStatus(object.id, 'off')}>Turn Off</button>
+                <button disabled={!!object.schedule} style={{background: 'white'}} onClick={() => switchStatus(object.id, 'on')}>Turn On</button>
+                : <button disabled={!!object.schedule} style={{background: 'yellow'}} onClick={() => switchStatus(object.id, 'off')}>Turn Off</button>
+              }
+              {object.schedule ?
+                <span style={{marginLeft: '20px'}}>{object.schedule.onTime} - {object.schedule.offTime}</span>
+                : null
               }
             </div>
           );

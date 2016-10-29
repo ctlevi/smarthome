@@ -23,7 +23,7 @@ function switchStatus(id, status) {
     .then(result => console.log(result));
 }
 
-function getSwitches() {
+function getGraph() {
   return fetch('https://gvw188k7c6.execute-api.us-west-2.amazonaws.com/prod/graphql', {
     method: 'POST',
     mode: 'cors',
@@ -39,6 +39,10 @@ function getSwitches() {
               onTime,
               offTime
             }
+          },
+          iotStatus {
+            lastPingTime,
+            minutesSinceLastPing
           }
         }
       `
@@ -46,22 +50,28 @@ function getSwitches() {
     headers: myHeaders
   }).catch(err => console.log(err))
     .then(response => response.json())
-    .then(result => result.data.switches);
+    .then(result => result.data);
 }
 
 class App extends Component {
   constructor() {
     super();
     this.state = {
-      switches: []
+      switches: [],
+      iotStatus: {},
+      loading: true
     };
   }
 
   componentDidMount() {
-    getSwitches().then(switches => this.setState({ switches }))
+    getGraph().then(graph => this.setState({ ...graph, loading: false }))
   }
 
   render() {
+    if (this.state.loading) {
+      return (<div className="App"></div>);
+    }
+
     return (
       <div className="App">
         {this.state.switches.map((object) => {
@@ -79,6 +89,10 @@ class App extends Component {
             </div>
           );
         })}
+        <div style={this.state.iotStatus.minutesSinceLastPing >= 5 ? {color: 'red'} : {color: 'green'}}>
+          The Raspberry Pi was last on at {new Date(this.state.iotStatus.lastPingTime).toLocaleString()},
+          which was {this.state.iotStatus.minutesSinceLastPing} minutes ago
+        </div>
       </div>
     );
   }

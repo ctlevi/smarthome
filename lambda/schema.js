@@ -2,6 +2,7 @@
 
 const G = require('graphql');
 const switchDao = require('./switch-dao');
+const iotDao = require('./iot-dao');
 const schedules = require('./schedules');
 
 const Schedule = new G.GraphQLObjectType({
@@ -31,6 +32,15 @@ const Switch = new G.GraphQLObjectType({
   })
 });
 
+const IotStatus = new G.GraphQLObjectType({
+  name: 'iotStatus',
+  description: 'A status object for the iot device controlling the switches',
+  fields: () => ({
+    lastPingTime: {type: G.GraphQLString},
+    minutesSinceLastPing: {type: G.GraphQLInt}
+  })
+});
+
 const Query = new G.GraphQLObjectType({
   name: 'SmartHomeSchema',
   description: "Root of the SmartHome Schema",
@@ -57,6 +67,13 @@ const Query = new G.GraphQLObjectType({
       description: "List of schedules we have for switches",
       resolve: function() {
         return schedules.getSchedules();
+      }
+    },
+    iotStatus: {
+      type: IotStatus,
+      description: "Current IoT device status",
+      resolve: function() {
+        return iotDao.getDeviceStatus();
       }
     }
   })

@@ -22,3 +22,13 @@ device
     const { code } = JSON.parse(payload);
     execSync(`./433Utils/RPi_utils/codesend ${code} 0 189`, {stdio: 'inherit'});
   });
+
+setInterval(() => {
+  device.publish('$aws/things/RaspberryPi/shadow/update', JSON.stringify({
+    state: {
+      reported : {
+        pingTime : new Date().toISOString()
+      }
+    }
+  }));
+}, 60000);

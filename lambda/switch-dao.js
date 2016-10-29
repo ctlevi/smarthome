@@ -3,7 +3,7 @@
 const AWS = require('aws-sdk');
 const Promise = require('bluebird');
 const docClient = new AWS.DynamoDB.DocumentClient();
-const iotdata = new AWS.IotData({endpoint: 	'a32nfefyjs2m0f.iot.us-west-2.amazonaws.com'});
+const iotDao = require('./iot-dao');
 
 const fullScanParams = {
   TableName : 'switches'
@@ -40,15 +40,7 @@ exports.getSwitch = function(id) {
 
 exports.refreshSwitches = function() {
   return exports.getSwitches().then((switches) => {
-    switches.forEach((item) => {
-      const params = getSwitchStatusParams(item, item.status);
-      iotdata.publish(params, function(err, data){
-        if(err) {
-          console.log(err);
-        }
-        console.log(`Turned switch with id ${item.switchItem.id} to ${item.status} using code ${params.payload}`);
-      });
-    });
+    switches.forEach((item) => iotDao.publishSwitchMessage(item, item.status));
   });
 };
 
@@ -59,13 +51,7 @@ exports.updateSwitchStatus = function(id, status) {
 
 function updateSwitchReal(id, status) {
   return exports.getSwitch(id).then((switchItem) => {
-    const params = getSwitchStatusParams(switchItem, status);
-    iotdata.publish(params, function (err, data) {
-      if (err) {
-        console.log(err);
-      }
-      console.log(`Turned switch with id ${id} to ${status} using code ${params.payload}`);
-    });
+    iotDao.publishSwitchMessage(switchItem, status);
   });
 }
 
@@ -89,12 +75,5 @@ function updateSwitchDDB(id, status) {
       return resolve(data);
     });
   });
-}
-
-function getSwitchStatusParams(switchItem, status) {
-  return {
-    topic: 'lights',
-    payload: JSON.stringify({ code: switchItem.codes[status] })
-  };
 }
 

@@ -1,0 +1,4 @@
+{
+  "query": "query { schedules { switchId, onTime, offTime }, switches { id, status, schedule { switchId, onTime, offTime } }, switch(id: \"1bfb8b71-d108-471f-a640-3ebdfe45e859\") { id }, iotStatus { lastPingTime, minutesSinceLastPing } }"
+  "query": "mutation { updateSwitchStatus(id: \"547e696b-4363-46c4-9643-0aa0a5aa72be\", status: \"on\") }"
+}

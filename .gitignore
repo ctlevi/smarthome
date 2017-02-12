@@ -5,9 +5,12 @@ node_modules
 
 # testing
 coverage
+# VS code converts typescript to js and throws these stupid artifacts in
+lambda/src/*.js*
 
 # production
 build
+dist
 
 # misc
 .DS_Store

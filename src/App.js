@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 var myHeaders = new Headers({
@@ -7,8 +6,13 @@ var myHeaders = new Headers({
   "Accept": "application/json"
 });
 
+let api = 'https://gvw188k7c6.execute-api.us-west-2.amazonaws.com/prod/graphql'
+if (process.env.NODE_ENV === 'development') {
+  api = 'https://gvw188k7c6.execute-api.us-west-2.amazonaws.com/prod/graphql-testing'
+}
+
 function switchStatus(id, status) {
-  fetch('https://gvw188k7c6.execute-api.us-west-2.amazonaws.com/prod/graphql', {
+  return fetch(api, {
     method: 'POST',
     mode: 'cors',
     body: JSON.stringify({
@@ -24,7 +28,7 @@ function switchStatus(id, status) {
 }
 
 function getGraph() {
-  return fetch('https://gvw188k7c6.execute-api.us-west-2.amazonaws.com/prod/graphql', {
+  return fetch(api, {
     method: 'POST',
     mode: 'cors',
     body: JSON.stringify({
@@ -50,7 +54,6 @@ function getGraph() {
     headers: myHeaders
   }).catch(err => console.log(err))
     .then(response => response.json())
-    .then(result => result.data);
 }
 
 class App extends Component {
@@ -63,28 +66,42 @@ class App extends Component {
     };
   }
 
+  refreshData() {
+    this.setState({ loading: true });
+    getGraph()
+      .then(graph => this.setState({ ...graph, loading: false }))
+      .catch(err => this.setState({ loading: false }));
+  }
+
+  onSwitchClick(id, status) {
+    return () => {
+      switchStatus(id, status)
+        .then(() => this.refreshData());
+    };
+  }
+
   componentDidMount() {
-    getGraph().then(graph => this.setState({ ...graph, loading: false }))
+    this.refreshData();
   }
 
   render() {
     if (this.state.loading) {
-      return (<div className="App"></div>);
+      return (<div className="App">Loading...</div>);
     }
 
     return (
       <div className="App">
         {this.state.switches.map((object) => {
           return (
-            <div>
-              <span style={{marginRight: '20px'}}>{object.purpose}</span>
+            <div className="switches">
+              <span>{object.purpose}</span>
               {object.status === 'off' ?
-                <button disabled={!!object.schedule} style={{background: 'white'}} onClick={() => switchStatus(object.id, 'on')}>Turn On</button>
-                : <button disabled={!!object.schedule} style={{background: 'yellow'}} onClick={() => switchStatus(object.id, 'off')}>Turn Off</button>
+                <button disabled={!!object.schedule} style={{background: 'white'}} onClick={this.onSwitchClick(object.id, 'on')}>Turn On</button>
+                : <button disabled={!!object.schedule} style={{background: 'yellow'}} onClick={this.onSwitchClick(object.id, 'off')}>Turn Off</button>
               }
               {object.schedule ?
-                <span style={{marginLeft: '20px'}}>{object.schedule.onTime} - {object.schedule.offTime}</span>
-                : null
+                <span>{object.schedule.onTime} - {object.schedule.offTime}</span>
+                : <span /> 
               }
             </div>
           );

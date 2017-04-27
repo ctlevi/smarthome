@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import './App.css';
 
-var myHeaders = new Headers({
+let globalPassword = window.localStorage.getItem('globalPassword');
+
+let myHeaders = new Headers({
   "Content-Type": "application/json",
-  "Accept": "application/json"
+  "Accept": "application/json",
+  "global-password": globalPassword,
 });
 
 let api = 'https://gvw188k7c6.execute-api.us-west-2.amazonaws.com/prod/graphql'
@@ -52,8 +55,13 @@ function getGraph() {
       `
     }),
     headers: myHeaders
-  }).catch(err => console.log(err))
-    .then(response => response.json())
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(response.status);
+    }
+    return response.json()
+  })
 }
 
 class App extends Component {
@@ -62,7 +70,9 @@ class App extends Component {
     this.state = {
       switches: [],
       iotStatus: {},
-      loading: true
+      loading: true,
+      password: '',
+      showPassword: !globalPassword
     };
   }
 
@@ -70,7 +80,12 @@ class App extends Component {
     this.setState({ loading: true });
     getGraph()
       .then(graph => this.setState({ ...graph, loading: false }))
-      .catch(err => this.setState({ loading: false }));
+      .catch(err => {
+        if (err.message === '403') {
+          this.setState({ showPassword: true });
+        }
+        this.setState({ loading: false })
+      });
   }
 
   onSwitchClick(id, status) {
@@ -84,7 +99,28 @@ class App extends Component {
     this.refreshData();
   }
 
+  passwordChange = (event) => {
+    this.setState({ password: event.target.value })
+  };
+
+  submitPassword = () => {
+    globalPassword = this.state.password;
+    window.localStorage.setItem('globalPassword', globalPassword);
+    myHeaders.set("global-password", globalPassword);
+    this.setState({ showPassword: false });
+    this.refreshData();
+  }
+
   render() {
+    if (this.state.showPassword) {
+      return (
+        <div className="App">
+          <input type="text" onChange={this.passwordChange}/>
+          <button onClick={this.submitPassword}>Save</button>
+        </div>
+      );
+    }
+
     if (this.state.loading) {
       return (<div className="App">Loading...</div>);
     }

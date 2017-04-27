@@ -12,32 +12,30 @@ export function getSchedules(): Promise<Schedule[]> {
   return getSchedulesByPrefix(RULE_PREFIX);
 }
 
-export function getSchedule(switchId: string): Promise<Schedule> {
+export async function getSchedule(switchId: string): Promise<Schedule | null> {
   // There should only be one group of rules (one on and one off rule) so just get the first of the list
-  return getSchedulesByPrefix(`${RULE_PREFIX}_${switchId}`)
-    .then((results) => results ? results[0] : null);
+  const results = await getSchedulesByPrefix(`${RULE_PREFIX}_${switchId}`)
+  return results.length > 0 ? results[0] : null;
 }
 
-function getSchedulesByPrefix(rulePrefix: string): Promise<Schedule[]> {
-  return promisify(cloudwatchEvents.listRules.bind(cloudwatchEvents), { NamePrefix: rulePrefix })
-    .then(data=> {
-      const converted: Rule[] = data.Rules.map((rule: any) => new Rule(rule));
+async function getSchedulesByPrefix(rulePrefix: string): Promise<Schedule[]> {
+  let data = await promisify(cloudwatchEvents.listRules.bind(cloudwatchEvents), { NamePrefix: rulePrefix })
 
-      return _.values(_.groupBy(converted, 'id')).map(function(rules) {
-        let onRule: Rule, offRule: Rule;
-        if (rules[0].status === 'on') {
-          onRule = rules[0];
-          offRule = rules[1];
-        } else {
-          onRule = rules[1];
-          offRule = rules[0];
-        }
+  const converted: Rule[] = data.Rules.map((rule: any) => new Rule(rule));
+  return _.values(_.groupBy(converted, 'id')).map(function(rules) {
+    let onRule: Rule, offRule: Rule;
+    if (rules[0].status === 'on') {
+      onRule = rules[0];
+      offRule = rules[1];
+    } else {
+      onRule = rules[1];
+      offRule = rules[0];
+    }
 
-        return {
-          switchId: onRule.id,
-          onTime: onRule.time,
-          offTime: offRule.time
-        };
-      });
-    });
+    return {
+      switchId: onRule.id,
+      onTime: onRule.time,
+      offTime: offRule.time
+    };
+  });
 }

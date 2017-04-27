@@ -7,13 +7,11 @@ const iotdata = new (AWS as any).IotData({endpoint: 'a32nfefyjs2m0f.iot.us-west-
 const LIGHTS_TOPIC = 'lights';
 const THING_NAME = 'RaspberryPi';
 
-export function publishSwitchMessage(switchItem: Switch, status: Status): Promise<boolean> {
+export async function publishSwitchMessage(switchItem: Switch, status: Status): Promise<boolean> {
   const params = getSwitchStatusParams(switchItem, status);
-  return promisify(iotdata.publish.bind(iotdata), params)
-    .then(() => {
-      console.log(`Turned switch with id ${switchItem.id} to ${status} using code ${params.payload}`);
-      return true;
-    });
+  await promisify(iotdata.publish.bind(iotdata), params);
+  console.log(`Turned switch with id ${switchItem.id} to ${status} using code ${params.payload}`);
+  return true;
 }
 
 function getSwitchStatusParams(switchItem: Switch, status: Status): { topic: string, payload: string } {
@@ -28,13 +26,11 @@ interface DeviceStatus {
   minutesSinceLastPing: string
 }
 
-export function getDeviceStatus(): Promise<DeviceStatus> {
-  return promisify(iotdata.getThingShadow.bind(iotdata), { thingName: THING_NAME })
-    .then((result) => {
-      const reportedState = JSON.parse(result.payload).state.reported;
-      return {
-        lastPingTime: reportedState.pingTime,
-        minutesSinceLastPing: moment().diff(moment(reportedState.pingTime), 'minutes')
-      }
-    });
+export async function getDeviceStatus(): Promise<DeviceStatus> {
+  let result = await promisify(iotdata.getThingShadow.bind(iotdata), { thingName: THING_NAME });
+  const reportedState = JSON.parse(result.payload).state.reported;
+  return {
+    lastPingTime: reportedState.pingTime,
+    minutesSinceLastPing: moment().diff(moment(reportedState.pingTime), 'minutes').toString()
+  };
 }

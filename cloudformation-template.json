@@ -13,6 +13,10 @@
             "Type": "String",
             "Description": "Enter the name of the bucket where the lambda code is stored"
         },
+        "AlexaSkillId": {
+            "Type": "String",
+            "Description": "Enter the skill id of the Alexa smart home application"
+        },
         "ApiGatewayStageName": {
             "Type": "String",
             "AllowedPattern": "^[a-z0-9]+$",
@@ -166,6 +170,22 @@
                             "Ref": "IoTThingName"
                         }
                     }
+                }
+            }
+        },
+        "LambdaFunctionAlexaPermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "LambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Principal": "alexa-connectedhome.amazon.com",
+                "EventSourceToken": {
+                    "Ref": "AlexaSkillId"
                 }
             }
         },

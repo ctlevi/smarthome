@@ -3,9 +3,10 @@ const uuid = require("uuid");
 
 const domain = $1;
 const password = $2;
-if (!domain || !password) {
+const skillId = $3;
+if (!domain || !password || !skillId) {
   echo(
-    "You need to specify the domain and password. e.g. node scripts/update-backend.js tatesmarthome.com thepassword"
+    "You need to specify the domain, password, and skillId. e.g. node scripts/update-backend.js tatesmarthome.com thepassword amzn1.ask.skill.27343"
   );
   exit(1);
 }
@@ -27,7 +28,7 @@ eval(
   `aws cloudformation update-stack \
     --stack-name smarthome \
     --template-body file://cloudformation-template.json \
-    --parameters ParameterKey=WebsiteDomain,ParameterValue=${domain} ParameterKey=GlobalPassword,ParameterValue=${password} ParameterKey=CodeBucket,ParameterValue=${bucketName} \
+    --parameters ParameterKey=WebsiteDomain,ParameterValue=${domain} ParameterKey=GlobalPassword,ParameterValue=${password} ParameterKey=AlexaSkillId,ParameterValue=${skillId} ParameterKey=CodeBucket,ParameterValue=${bucketName} \
     --capabilities CAPABILITY_IAM`
 );
 

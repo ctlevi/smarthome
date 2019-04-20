@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import "./App.css";
+import * as config from "./generated-config.json";
 
 let globalPassword = window.localStorage.getItem("globalPassword");
 
@@ -10,7 +11,7 @@ let myHeaders = new Headers({
 });
 
 // TODO get this during build from cloudformation
-let api = "https://rctshqrupb.execute-api.us-east-1.amazonaws.com/prod/graphql";
+let api = config.graphQLUrl;
 // if (process.env.NODE_ENV === "development") {
 //   api =
 //     "https://gvw188k7c6.execute-api.us-west-2.amazonaws.com/prod/graphql-testing";

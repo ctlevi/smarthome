@@ -2,9 +2,10 @@ import * as AWS from "aws-sdk";
 import * as moment from "moment";
 import { Switch, Status } from "./interfaces/switch";
 import { promisify } from "./utils";
+import config from "./config";
 
 const iotdata = new (AWS as any).IotData({
-  endpoint: "a3837ewis9cel6-ats.iot.us-east-1.amazonaws.com"
+  endpoint: config.iotEndpointAddress
 });
 const LIGHTS_TOPIC = "lights";
 const THING_NAME = process.env.THING_NAME;

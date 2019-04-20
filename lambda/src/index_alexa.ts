@@ -7,14 +7,15 @@ export async function handler(request: any) {
   ) {
     log("DEBUG:", "Discover request", JSON.stringify(request));
     return await handleDiscovery(request);
-  } else if (request.directive.header.namespace === "Alexa.PowerController") {
-    if (
-      request.directive.header.name === "TurnOn" ||
-      request.directive.header.name === "TurnOff"
-    ) {
-      log("DEBUG:", "TurnOn or TurnOff Request", JSON.stringify(request));
-      return await handlePowerControl(request);
-    }
+  } else if (
+    request.directive.header.namespace === "Alexa.PowerController" &&
+    (request.directive.header.name === "TurnOn" ||
+      request.directive.header.name === "TurnOff")
+  ) {
+    log("DEBUG:", "TurnOn or TurnOff Request", JSON.stringify(request));
+    return await handlePowerControl(request);
+  } else {
+    return null;
   }
 }
 

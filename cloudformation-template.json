@@ -4,6 +4,14 @@
         "WebsiteDomain": {
             "Type": "String",
             "Description": "Enter your website domain, e.g. tatesmarthome.com"
+        },
+        "GlobalPassword": {
+            "Type": "String",
+            "Description": "Enter the of the password to protect the lambda function (you will enter this when you access the website for the first time)"
+        },
+        "CodeBucket": {
+            "Type": "String",
+            "Description": "Enter the name of the bucket where the lambda code is stored"
         }
     },
     "Resources": {
@@ -91,6 +99,61 @@
                 "ProvisionedThroughput": {
                     "ReadCapacityUnits": 5,
                     "WriteCapacityUnits": 5
+                }
+            }
+        },
+        "LambdaFunctionRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess",
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+                    "arn:aws:iam::aws:policy/AWSIoTFullAccess",
+                    "arn:aws:iam::aws:policy/CloudWatchEventsFullAccess"
+                ]
+            }
+        },
+        "LambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "FunctionName": "SmarthomeFunction",
+                "Handler": "index.handler",
+                "MemorySize": 3008,
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "CodeBucket"
+                    },
+                    "S3Key": "lambda.zip"
+                },
+                "Role": {
+                    "Fn::GetAtt": [
+                        "LambdaFunctionRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs8.10",
+                "Environment": {
+                    "Variables": {
+                        "globalPassword": {
+                            "Ref": "GlobalPassword"
+                        }
+                    }
                 }
             }
         }

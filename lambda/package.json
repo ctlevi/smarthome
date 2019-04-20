@@ -7,6 +7,7 @@
     "tsc": "tsc",
     "watch": "tsc -w",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -r dist; tsc; cp -r node_modules dist/node_modules; cd dist; rm -r node_modules/typescript; rm -r node_modules/.bin; rm -r node_modules/@types; zip -r lambda.zip .",
     "upload": "rm lambda.zip; tsc; zip -r lambda.zip .; aws lambda update-function-code --function-name SmartHomeGraphQL --zip-file fileb://lambda.zip"
   },
   "author": "",

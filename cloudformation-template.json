@@ -1,0 +1,109 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "WebsiteDomain": {
+            "Type": "String",
+            "Description": "Enter your website domain, e.g. tatesmarthome.com"
+        }
+    },
+    "Resources": {
+        "WebsiteBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Metadata": {
+                "Comment": "Really just creating this in case you ever need it since buckets are globally unique across AWS. I only needed the www bucket, but some AWS setup pages seem like you might want to redirect from www to root. But my domain provider seems to do that for me. https://docs.aws.amazon.com/AmazonS3/latest/dev/website-hosting-custom-domain-walkthrough.html"
+            },
+            "Properties": {
+                "BucketName": {
+                    "Ref": "WebsiteDomain"
+                }
+            }
+        },
+        "WWWWebsiteBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "www.",
+                            {
+                                "Ref": "WebsiteDomain"
+                            }
+                        ]
+                    ]
+                },
+                "AccessControl": "PublicRead",
+                "WebsiteConfiguration": {
+                    "IndexDocument": "index.html",
+                    "ErrorDocument": "error.html"
+                }
+            },
+            "DeletionPolicy": "Retain"
+        },
+        "WebsiteBucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Id": "MyPolicy",
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "PublicReadForGetBucketObjects",
+                            "Effect": "Allow",
+                            "Principal": "*",
+                            "Action": "s3:GetObject",
+                            "Resource": {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "arn:aws:s3:::",
+                                        {
+                                            "Ref": "WWWWebsiteBucket"
+                                        },
+                                        "/*"
+                                    ]
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "Bucket": {
+                    "Ref": "WWWWebsiteBucket"
+                }
+            }
+        },
+        "SwitchesDynamoTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+                "TableName": "switches",
+                "AttributeDefinitions": [
+                    {
+                        "AttributeName": "id",
+                        "AttributeType": "S"
+                    }
+                ],
+                "KeySchema": [
+                    {
+                        "AttributeName": "id",
+                        "KeyType": "HASH"
+                    }
+                ],
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": 5,
+                    "WriteCapacityUnits": 5
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "WebsiteURL": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "WWWWebsiteBucket",
+                    "WebsiteURL"
+                ]
+            },
+            "Description": "URL for website hosted on S3"
+        }
+    }
+}

@@ -12,6 +12,18 @@ npm run build // Compiles the C++ code to send the RF signals
 npm run start // Starts the script in a forever process
 ```
 
+## AWS Resources
+To create:
+Make sure to replace the parameters with what you care about. Descriptions can be found at the top of cloudformation-template.json
+`aws cloudformation create-stack --stack-name smarthome --template-body file://cloudformation-template.json -parameters ParameterKey=WebsiteDomain,ParameterValue=tatesmarthome.com`
+
+To update:
+`aws cloudformation update-stack --stack-name smarthome --template-body file://cloudformation-template.json --parameters ParameterKey=WebsiteDomain,ParameterValue=tatesmarthome.com`
+
+The AWS Resources give you:
+* A public S3 bucket that you can find the url of the bucket in the output of the Cloudformation stack creation, called WebsiteURL. You can manually update the CNAME record with your domain provider so that your domain you gave during creation will point to this bucket with the website.
+* A DynamoDB table called "switches" with some configuration data for the radio switches you want to control. You can use config/switches.json to set up the radio signal codes and names of the switches. Running `node scripts/update-switches.js` will update the table based on the config.
+
 # Project structure
 The project is a single page webapp with a single AWS Lambda GraphQL endpoint. This endpoint talks to a RaspberryPi over
 AWS IoT's device gateway. This provides secure access to the RaspberryPi, and you can leave it inside your home network

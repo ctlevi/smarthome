@@ -1,0 +1,57 @@
+[
+    {
+        "id": "c5726166-10a5-40f9-b6f5-38a0f70adc46",
+        "alexaSpeakWord": "holiday cheer",
+        "codes": {
+            "off": 87356,
+            "on": 87347
+        },
+        "number": 1,
+        "purpose": "Christmas Tree Lights",
+        "status": "off"
+    },
+    {
+        "id": "1bfb8b71-d108-471f-a640-3ebdfe45e859",
+        "alexaSpeakWord": "dining room",
+        "codes": {
+            "off": 87500,
+            "on": 87491
+        },
+        "number": 2,
+        "purpose": "Dining Room",
+        "status": "off"
+    },
+    {
+        "id": "47a0b823-a3e9-4d46-9a88-08a10340cc8e",
+        "alexaSpeakWord": "living room",
+        "codes": {
+            "off": 87820,
+            "on": 87811
+        },
+        "number": 3,
+        "purpose": "Living room light",
+        "status": "off"
+    },
+    {
+        "id": "547e696b-4363-46c4-9643-0aa0a5aa72be",
+        "alexaSpeakWord": "office",
+        "codes": {
+            "off": 89356,
+            "on": 89347
+        },
+        "number": 4,
+        "purpose": "Office Light",
+        "status": "off"
+    },
+    {
+        "id": "6ddb3db0-a7f3-43fb-a199-40ad911fe548",
+        "alexaSpeakWord": "bedroom",
+        "codes": {
+            "off": 95500,
+            "on": 954910
+        },
+        "number": 5,
+        "purpose": "Bedroom Light",
+        "status": "off"
+    }
+]

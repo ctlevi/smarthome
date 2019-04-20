@@ -1,9 +1,12 @@
-import * as G from 'graphql';
-import Schema from './schema';
+import * as G from "graphql";
+import Schema from "./schema";
 
 export function handler(event: any, context: any, callback: any) {
   try {
-    if (!event.headers || event.headers['global-password'] !== process.env.globalPassword) {
+    if (
+      !event.headers ||
+      event.headers["global-password"] !== process.env.GLOBAL_PASSWORD
+    ) {
       return callback(null, makeResponseObject(403));
     }
 
@@ -14,8 +17,8 @@ export function handler(event: any, context: any, callback: any) {
     // patch to allow queries from GraphiQL
     // like the initial introspectionQuery
     // TODO, I highly doubt this works anymore now that we are doing api gateway proxy
-    if (event.query && event.query.hasOwnProperty('query')) {
-      query = event.query.query.replace("\n", ' ', "g");
+    if (event.query && event.query.hasOwnProperty("query")) {
+      query = event.query.query.replace("\n", " ", "g");
     }
 
     // Came from api gateway
@@ -26,7 +29,10 @@ export function handler(event: any, context: any, callback: any) {
     G.graphql(Schema, query)
       .then(result => {
         if (result.errors) {
-          callback(null, makeResponseObject(500, JSON.stringify(result.errors)));
+          callback(
+            null,
+            makeResponseObject(500, JSON.stringify(result.errors))
+          );
         } else {
           callback(null, makeResponseObject(200, JSON.stringify(result.data)));
         }
@@ -43,7 +49,7 @@ function makeResponseObject(statusCode: number, body?: string) {
     statusCode: statusCode,
     body: body,
     headers: {
-      'Access-Control-Allow-Origin': '*', // TODO env-var that sets http://www.tatesmarthome.com
+      "Access-Control-Allow-Origin": "*" // TODO env-var that sets http://www.tatesmarthome.com
     }
-  }
+  };
 }

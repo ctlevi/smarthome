@@ -17,6 +17,10 @@
             "Type": "String",
             "AllowedPattern": "^[a-z0-9]+$",
             "Default": "prod"
+        },
+        "IoTThingName": {
+            "Type": "String",
+            "Default": "RaspberryPi"
         }
     },
     "Resources": {
@@ -155,8 +159,11 @@
                 "Runtime": "nodejs8.10",
                 "Environment": {
                     "Variables": {
-                        "globalPassword": {
+                        "GLOBAL_PASSWORD": {
                             "Ref": "GlobalPassword"
+                        },
+                        "THING_NAME": {
+                            "Ref": "IoTThingName"
                         }
                     }
                 }
@@ -314,6 +321,44 @@
                         "ThrottlingBurstLimit": 5
                     }
                 ]
+            }
+        },
+        "IoTThing": {
+            "Type": "AWS::IoT::Thing",
+            "Properties": {
+                "ThingName": {
+                    "Ref": "IoTThingName"
+                }
+            }
+        },
+        "IoTThingPolicy": {
+            "Type": "AWS::IoT::Policy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Action": [
+                                "iot:*"
+                            ],
+                            "Resource": [
+                                "*"
+                            ],
+                            "Effect": "Allow"
+                        }
+                    ]
+                },
+                "PolicyName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "IoTThingName"
+                            },
+                            "Policy"
+                        ]
+                    ]
+                }
             }
         }
     },

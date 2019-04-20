@@ -25,7 +25,7 @@ The AWS Resources give you:
 * A DynamoDB table called "switches" with some configuration data for the radio switches you want to control. You can use config/switches.json to set up the radio signal codes and names of the switches. Running `node scripts/update-switches.js` will update the table based on the config.
 * A single lambda function that can handle Alexa requests and GraphQL requests. The website uses the GraphQL backend. Additional setup needs to be done manually in the Alexa console to get that working.
 * An API Gateway endpoint that fronts the GraphQL lambda function. The webapp will call this directly.
-* TODO An IoT thing so that we can send messages to the Raspberry Pi. Once created, you will need to get a certificate from the IoT console and place it on the Raspberry Pi. As well as starting up the Node.JS code on the raspberry pi that listens for the messages from our lambda function.
+* An IoT thing so that we can send messages to the Raspberry Pi. Once created, you will need to get a certificate from the IoT console and place it on the Raspberry Pi. As well as starting up the Node.JS code on the raspberry pi that listens for the messages from our lambda function.
 
 # Project structure (OUT OF DATE)
 The project is a single page webapp with a single AWS Lambda GraphQL endpoint. This endpoint talks to a RaspberryPi over

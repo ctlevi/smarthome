@@ -34,4 +34,6 @@ eval(
 echo(
   "Run the following to delete the bucket with the temporary code once the stack has finished updating"
 );
-echo(`aws s3 delete-bucket ${bucketName}`);
+echo(
+  `aws s3 rm s3://${bucketName} --recursive && aws s3api delete-bucket --bucket ${bucketName}`
+);

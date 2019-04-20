@@ -9,11 +9,12 @@ let myHeaders = new Headers({
   "global-password": globalPassword
 });
 
-let api = "https://gvw188k7c6.execute-api.us-west-2.amazonaws.com/prod/graphql";
-if (process.env.NODE_ENV === "development") {
-  api =
-    "https://gvw188k7c6.execute-api.us-west-2.amazonaws.com/prod/graphql-testing";
-}
+// TODO get this during build from cloudformation
+let api = "https://rctshqrupb.execute-api.us-east-1.amazonaws.com/prod/graphql";
+// if (process.env.NODE_ENV === "development") {
+//   api =
+//     "https://gvw188k7c6.execute-api.us-west-2.amazonaws.com/prod/graphql-testing";
+// }
 
 function switchStatus(id, status) {
   return fetch(api, {

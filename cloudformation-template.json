@@ -12,6 +12,11 @@
         "CodeBucket": {
             "Type": "String",
             "Description": "Enter the name of the bucket where the lambda code is stored"
+        },
+        "ApiGatewayStageName": {
+            "Type": "String",
+            "AllowedPattern": "^[a-z0-9]+$",
+            "Default": "prod"
         }
     },
     "Resources": {
@@ -156,6 +161,137 @@
                     }
                 }
             }
+        },
+        "SmarthomeAPI": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+                "Name": "SmarthomeAPI"
+            }
+        },
+        "SmarthomeAPIResource": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Fn::GetAtt": [
+                        "SmarthomeAPI",
+                        "RootResourceId"
+                    ]
+                },
+                "RestApiId": {
+                    "Ref": "SmarthomeAPI"
+                },
+                "PathPart": "graphql"
+            }
+        },
+        "SmarthomeAPIGraphQLMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "POST",
+                "ResourceId": {
+                    "Ref": "SmarthomeAPIResource"
+                },
+                "RestApiId": {
+                    "Ref": "SmarthomeAPI"
+                },
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Sub": [
+                            "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations",
+                            {
+                                "lambdaArn": {
+                                    "Fn::GetAtt": [
+                                        "LambdaFunction",
+                                        "Arn"
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "SmarthomeAPIOptionsMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "ResourceId": {
+                    "Ref": "SmarthomeAPIResource"
+                },
+                "RestApiId": {
+                    "Ref": "SmarthomeAPI"
+                },
+                "Integration": {
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": 200,
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'global-password,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'POST,OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates": {
+                        "application/json": "{\"statusCode\": 200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses": [
+                    {
+                        "StatusCode": 200,
+                        "ResponseModels": {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        }
+                    }
+                ]
+            }
+        },
+        "SmarthomeAPIDeployment": {
+            "Type": "AWS::ApiGateway::Deployment",
+            "DependsOn": [
+                "SmarthomeAPIGraphQLMethod",
+                "SmarthomeAPIOptionsMethod"
+            ],
+            "Properties": {
+                "RestApiId": {
+                    "Ref": "SmarthomeAPI"
+                }
+            }
+        },
+        "SmarthomeAPIStage": {
+            "Type": "AWS::ApiGateway::Stage",
+            "Properties": {
+                "StageName": {
+                    "Ref": "ApiGatewayStageName"
+                },
+                "RestApiId": {
+                    "Ref": "SmarthomeAPI"
+                },
+                "DeploymentId": {
+                    "Ref": "SmarthomeAPIDeployment"
+                },
+                "MethodSettings": [
+                    {
+                        "HttpMethod": "*",
+                        "ResourcePath": "/*",
+                        "ThrottlingRateLimit": 1,
+                        "ThrottlingBurstLimit": 5
+                    }
+                ]
+            }
         }
     },
     "Outputs": {
@@ -167,6 +303,21 @@
                 ]
             },
             "Description": "URL for website hosted on S3"
+        },
+        "GraphQLURL": {
+            "Value": {
+                "Fn::Sub": [
+                    "https://${id}.execute-api.${AWS::Region}.amazonaws.com/${stage}",
+                    {
+                        "id": {
+                            "Ref": "SmarthomeAPI"
+                        },
+                        "stage": {
+                            "Ref": "ApiGatewayStageName"
+                        }
+                    }
+                ]
+            }
         }
     }
 }

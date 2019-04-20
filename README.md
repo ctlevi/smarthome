@@ -24,7 +24,7 @@ The AWS Resources give you:
 * A public S3 bucket that you can find the url of the bucket in the output of the Cloudformation stack creation, called WebsiteURL. You can manually update the CNAME record with your domain provider so that your domain you gave during creation will point to this bucket with the website.
 * A DynamoDB table called "switches" with some configuration data for the radio switches you want to control. You can use config/switches.json to set up the radio signal codes and names of the switches. Running `node scripts/update-switches.js` will update the table based on the config.
 
-# Project structure
+# Project structure (OUT OF DATE)
 The project is a single page webapp with a single AWS Lambda GraphQL endpoint. This endpoint talks to a RaspberryPi over
 AWS IoT's device gateway. This provides secure access to the RaspberryPi, and you can leave it inside your home network
 unexposed to the greater network.

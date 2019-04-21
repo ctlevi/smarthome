@@ -115,6 +115,36 @@
                 }
             }
         },
+        "EventsDynamoTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+                "TableName": "events",
+                "AttributeDefinitions": [
+                    {
+                        "AttributeName": "date",
+                        "AttributeType": "S"
+                    },
+                    {
+                        "AttributeName": "time",
+                        "AttributeType": "S"
+                    }
+                ],
+                "KeySchema": [
+                    {
+                        "AttributeName": "date",
+                        "KeyType": "HASH"
+                    },
+                    {
+                        "AttributeName": "time",
+                        "KeyType": "RANGE"
+                    }
+                ],
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": 5,
+                    "WriteCapacityUnits": 5
+                }
+            }
+        },
         "LambdaFunctionRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
